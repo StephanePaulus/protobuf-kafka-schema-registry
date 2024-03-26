@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package customer.onboarding.v1;
+
+import "confluent/meta.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "CommonProto";
+option java_package = "com.proto.customer.onboarding.v1";
+
+message ProspectName {
+  string first_name = 1 [(.confluent.field_meta).tags = "PII"];
+  string last_name = 2 [(.confluent.field_meta).tags = "PII"];
+}

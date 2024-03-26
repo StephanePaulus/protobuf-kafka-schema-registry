@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package customer.onboarding.v1;
+
+import "confluent/meta.proto";
+import "customer/onboarding/v1/common.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "AddressProto";
+option java_package = "com.proto.customer.onboarding.v1";
+
+message Address {
+  int32 version = 1;
+
+  string prospect_id = 2;
+
+  .customer.onboarding.v1.ProspectName verified_name = 3;
+
+  string street = 4 [(.confluent.field_meta).tags = "PII"];
+  string house_number = 5 [(.confluent.field_meta).tags = "PII"];
+  string city = 6;
+  string country = 7;
+  string postal_code = 8;
+
+  AddressVerificationStatus status = 9;
+}
+
+enum AddressVerificationStatus {
+  ADDRESS_VERIFICATION_STATUS_UNSPECIFIED = 0;
+  ADDRESS_VERIFICATION_STATUS_WAITING_FOR_ID_VERIFICATION = 1;
+  ADDRESS_VERIFICATION_STATUS_WAITING_FOR_ADDRESS_DATA = 2;
+  ADDRESS_VERIFICATION_STATUS_ONGOING = 3;
+  ADDRESS_VERIFICATION_STATUS_VERIFIED = 4;
+}

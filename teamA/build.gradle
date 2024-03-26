@@ -1,0 +1,66 @@
+plugins {
+    id 'java-library'
+    id 'build.buf' version '0.9.0'
+    id 'maven-publish'
+    id "com.google.protobuf" version '0.9.4'
+    id 'pl.allegro.tech.build.axion-release' version "1.17.0"
+}
+
+scmVersion {
+    tag {
+        prefix.set(name)
+        versionSeparator.set("-")
+    }
+    versionCreator('versionWithBranch')
+    repository {
+        pushTagsOnly = true
+    }
+    checks {
+        uncommittedChanges = false
+        aheadOfRemote = false
+        snapshotDependencies = false
+    }
+    versionIncrementer('incrementMinor')
+}
+
+version = scmVersion.version
+group = 'com.proto'
+java {
+    toolchain {    languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+repositories {
+    maven {
+        url "https://packages.confluent.io/maven/"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.google.protobuf:protobuf-java:${protoc_version}"
+    api('io.confluent:kafka-protobuf-types:7.6.0')
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protoc_version}"
+    }
+}
+
+buf {
+    publishSchema = false
+    checkSchemaAgainstLatestRelease = false
+}
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}

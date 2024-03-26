@@ -1,0 +1,51 @@
+name: Gradle and Buf
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: wrapper
+      - name: Execute Gradle build
+        id: setVariables
+        env:
+          PACKAGES_TOKEN: ${{ secrets.ALP_ACC_SVC_CI_TOKEN }}
+          GITHUB_USERNAME: "ALP-ACC-SVC-Github"
+          GITHUB_TOKEN: ${{ secrets.ALP_ACC_SVC_CI_TOKEN }}
+        run: |
+          ./gradlew clean
+          echo "BUILD_TASKS=$(./gradlew buildTasks -q -Prelease.overriddenBranchName=${{ github.head_ref }})" >> $GITHUB_ENV
+#          echo "PUBLISH_TASKS=$(./gradlew publishTasks -q -Prelease.overriddenBranchName=${{ github.head_ref }})" >> $GITHUB_ENV
+      - name: Execute Gradle build
+        id: build
+        env:
+          PACKAGES_TOKEN: ${{ secrets.ALP_ACC_SVC_CI_TOKEN }}
+          GITHUB_USERNAME: "ALP-ACC-SVC-Github"
+          GITHUB_TOKEN: ${{ secrets.ALP_ACC_SVC_CI_TOKEN }}
+        run: |
+          ./gradlew $BUILD_TASKS -Prelease.overriddenBranchName=${{ github.head_ref }}
+#      - name: publish
+#        env:
+#          PACKAGES_TOKEN: ${{ secrets.ALP_ACC_SVC_CI_TOKEN }}
+#          GITHUB_USERNAME: "ALP-ACC-SVC-Github"
+#          GITHUB_TOKEN: ${{ secrets.ALP_ACC_SVC_CI_TOKEN }}
+#        run: |
+#          ./gradlew $PUBLISH_TASKS -Prelease.overriddenBranchName=${{ github.head_ref }}

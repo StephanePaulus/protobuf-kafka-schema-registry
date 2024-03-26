@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package customer.onboarding.v1;
+
+import "customer/common/v1/shared.proto";
+import "customer/onboarding/v1/common.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "IdentityProto";
+option java_package = "com.proto.customer.onboarding.v1";
+
+message Identity {
+  int32 version = 1;
+  string prospect_id = 2;
+  .customer.onboarding.v1.ProspectName prospect_name = 3;
+  .customer.common.v1.IdentityVerificationStatus status = 4;
+}

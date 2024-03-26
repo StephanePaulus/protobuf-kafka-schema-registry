@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package customer.onboarding.v1;
+
+import "confluent/meta.proto";
+import "customer/common/v1/shared.proto";
+import "customer/onboarding/v1/common.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "ProspectProto";
+option java_package = "com.proto.customer.onboarding.v1";
+
+message Prospect {
+  int32 version = 1;
+  string prospect_id = 2;
+  .customer.onboarding.v1.ProspectName verified_name = 3;
+  .customer.common.v1.Title title = 4;
+  string email = 5 [(.confluent.field_meta).tags = "PII"];
+  .customer.common.v1.MaritalStatus marital_status = 6;
+  ProspectComplianceVerificationStatus compliance_status = 7;
+}
+
+enum ProspectComplianceVerificationStatus {
+  PROSPECT_COMPLIANCE_VERIFICATION_STATUS_UNSPECIFIED = 0;
+  PROSPECT_COMPLIANCE_VERIFICATION_STATUS_WAITING_FOR_VALID_NAME = 1;
+  PROSPECT_COMPLIANCE_VERIFICATION_STATUS_WAITING_FOR_COMPLIANCE_DATA = 2;
+  PROSPECT_COMPLIANCE_VERIFICATION_STATUS_SECTOR_VALID = 3;
+  PROSPECT_COMPLIANCE_VERIFICATION_STATUS_SECTOR_ERROR = 4;
+  PROSPECT_COMPLIANCE_VERIFICATION_STATUS_VERIFIED = 5;
+  PROSPECT_COMPLIANCE_VERIFICATION_STATUS_HIGH_RISK = 6;
+  PROSPECT_COMPLIANCE_VERIFICATION_STATUS_ERROR = 7;
+}

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package customer.onboarding.v1;
+
+import "customer/onboarding/v1/address.proto";
+import "customer/onboarding/v1/identity.proto";
+import "customer/onboarding/v1/prospect.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "OnboardingProto";
+option java_package = "com.proto.customer.onboarding.v1";
+
+message Onboarding {
+  int32 version = 1;
+  string prospect_id = 2;
+  .customer.onboarding.v1.Address address = 3;
+  .customer.onboarding.v1.Prospect prospect = 4;
+  .customer.onboarding.v1.Identity identity = 5;
+  OnboardingStatus status = 6;
+}
+
+enum OnboardingStatus {
+  ONBOARDING_STATUS_UNSPECIFIED = 0;
+  ONBOARDING_STATUS_WAITING_FOR_ID_VERIFICATION = 1;
+  ONBOARDING_STATUS_WAITING_FOR_COMPLIANCE_VERIFICATION = 2;
+  ONBOARDING_STATUS_WAITING_FOR_ADDRESS = 3;
+  ONBOARDING_STATUS_CONTRACT_BEING_GENERATED = 4;
+  ONBOARDING_STATUS_READY_FOR_SIGNING = 5;
+}

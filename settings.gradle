@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        maven {
+            url = "https://packages.confluent.io/maven/"
+        }
+        maven {
+            url = "https://jitpack.io"
+        }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = "protobuf-kafka-schema-registry"
+include "teamA"
