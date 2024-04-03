@@ -12,3 +12,5 @@ pluginManagement {
 
 rootProject.name = "protobuf-kafka-schema-registry"
 include "teamA"
+include 'spring-boot'
+

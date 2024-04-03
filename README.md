@@ -19,3 +19,13 @@ register{
 ```
 
 Are there ways to make this less verbose? 
+
+
+## RUN test
+
+in `teamA/build.gradle` you will have the broken schema defined and the working schema commented out.
+
+1. docker-compose up should start kafka and a schema-registry
+2. ./gradlew registerSchemasTask
+3. ./gradlew build
+4. ./gradlew bootRun ==> will fail, if you register the other schema with the different naming, it works. [you will need to delete the docker containers]

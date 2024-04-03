@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: kafka-schema-registry-test
+  main:
+    banner-mode: off
+  kafka:
+    properties:
+      schema.registry.url: http://localhost:8081
+      security.protocol: PLAINTEXT
+      sasl.mechanism: PLAIN
+      sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username=empty password=empty;
+      auto.register.schemas: false
+      normalize.schemas: true
+    producer:
+      key-serializer: org.springframework.kafka.support.serializer.DelegatingSerializer
+      value-serializer: io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer
+    bootstrap-servers: http://localhost:9092
+  output:
+    ansi:
+      enabled: always
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  shutdown: graceful

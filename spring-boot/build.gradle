@@ -1,0 +1,100 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.3'
+    id 'com.diffplug.spotless' version "6.25.0"
+    id 'io.freefair.lombok' version "8.4"
+    id 'pl.allegro.tech.build.axion-release' version "1.17.0"
+    id 'jacoco-report-aggregation'
+}
+
+scmVersion {
+    snapshotCreator({ version, position ->
+        {
+            if (position.branch != 'main') {
+                "-alpha"
+            } else {
+                "-rc-" + position.shortRevision
+            }
+        }
+    })
+    versionCreator('versionWithBranch')
+    repository {
+        pushTagsOnly = true
+    }
+    checks {
+        uncommittedChanges = false
+        aheadOfRemote = false
+        snapshotDependencies = false
+    }
+    versionIncrementer('incrementMinor')
+}
+
+group = 'com.example'
+version = scmVersion.version
+description = 'Service to demonstrate kafka schema registry and protobuf'
+
+repositories {
+    maven {
+        url "https://packages.confluent.io/maven/"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    annotationProcessor platform(SpringBootPlugin.BOM_COORDINATES)
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    implementation platform(SpringBootPlugin.BOM_COORDINATES)
+
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude module: 'spring-boot-starter-tomcat'
+    }
+    implementation 'org.springframework.boot:spring-boot-starter-undertow'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    implementation 'io.confluent:kafka-protobuf-serializer:7.5.1'
+
+    implementation project(":teamA")
+    testImplementation platform('org.testcontainers:testcontainers-bom:1.19.1') //import bom
+    testImplementation "org.testcontainers:kafka"
+    testImplementation "org.testcontainers:junit-jupiter"
+
+    testImplementation "org.springframework.boot:spring-boot-devtools"
+    testImplementation 'org.springframework.boot:spring-boot-starter-webflux'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+spotless {
+    java {
+        cleanthat()
+        removeUnusedImports()
+        formatAnnotations()
+        palantirJavaFormat().style("GOOGLE")
+    }
+    format "misc", {
+        target "**/*.gradle", "**/*.md", "**/.gitignore"
+        trimTrailingWhitespace()
+        indentWithSpaces()
+        endWithNewline()
+    }
+    compileJava.dependsOn "spotlessApply"
+}

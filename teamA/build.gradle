@@ -3,6 +3,7 @@ plugins {
     id 'build.buf' version '0.9.0'
     id 'maven-publish'
     id "com.google.protobuf" version '0.9.4'
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "2.1.0"
     id 'pl.allegro.tech.build.axion-release' version "1.17.0"
 }
 
@@ -57,10 +58,92 @@ java {
     withSourcesJar()
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
-        }
+schemaRegistry {
+    url = "http://localhost:8081"//System.getenv('SCHEMA_REGISTRY_URL')
+    //credentials {
+    //    username = System.getenv('SCHEMA_REGISTRY_USERNAME')
+    //    password = System.getenv('SCHEMA_REGISTRY_PASSWORD')
+    //}
+    register {
+        //THIS DOES NOT WORK
+        //FOR REFERENCES
+        subject('shared', 'teamA/src/main/proto/customer/common/v1/shared.proto', "PROTOBUF")
+                .setNormalized(true)
+        subject('common', 'teamA/src/main/proto/customer/onboarding/v1/common.proto', "PROTOBUF")
+                .setNormalized(true)
+        subject('prospect', 'teamA/src/main/proto/customer/onboarding/v1/prospect.proto', "PROTOBUF")
+                .addReference('customer/common/v1/shared.proto','shared')
+                .addReference('customer/onboarding/v1/common.proto','common')
+                .setNormalized(true)
+        subject('identity', 'teamA/src/main/proto/customer/onboarding/v1/identity.proto', "PROTOBUF")
+                .addReference('customer/common/v1/shared.proto','shared')
+                .addReference('customer/onboarding/v1/common.proto','common')
+                .setNormalized(true)
+        subject('address', 'teamA/src/main/proto/customer/onboarding/v1/address.proto', "PROTOBUF")
+                .addReference('customer/onboarding/v1/common.proto','common')
+                .setNormalized(true)
+
+
+        subject('stg.cu.onboarding.prospect-value', 'teamA/src/main/proto/customer/onboarding/v1/prospect.proto', "PROTOBUF")
+                .addReference('customer/common/v1/shared.proto','shared')
+                .addReference('customer/onboarding/v1/common.proto','common')
+                .setNormalized(true)
+                .setRuleSet('rules/ruleSet.json')
+        subject('stg.cu.onboarding.address-value', 'teamA/src/main/proto/customer/onboarding/v1/address.proto', "PROTOBUF")
+                .addReference('customer/onboarding/v1/common.proto','common')
+                .setNormalized(true)
+                .setRuleSet('rules/ruleSet.json')
+        subject('stg.cu.onboarding.identity-value', 'teamA/src/main/proto/customer/onboarding/v1/identity.proto', "PROTOBUF")
+                .addReference('customer/common/v1/shared.proto','shared')
+                .addReference('customer/onboarding/v1/common.proto','common')
+                .setNormalized(true)
+                .setRuleSet('rules/ruleSet.json')
+        subject('stg.cu.onboarding.onboarding-value', 'teamA/src/main/proto/customer/onboarding/v1/onboarding.proto', "PROTOBUF")
+                .addReference('customer/onboarding/v1/address.proto','address')
+                .addReference('customer/onboarding/v1/prospect.proto','prospect')
+                .addReference('customer/onboarding/v1/identity.proto','identity')
+                .setNormalized(true)
+                .setRuleSet('rules/ruleSet.json')
+
     }
+
+/*
+THIS WORKS ==> subject names need to be exact.
+
+register {
+        //FOR REFERENCES
+        subject('customer/common/v1/shared.proto', 'teamA/src/main/proto/customer/common/v1/shared.proto', "PROTOBUF")
+                .setNormalized(true)
+        subject('customer/onboarding/v1/common.proto', 'teamA/src/main/proto/customer/onboarding/v1/common.proto', "PROTOBUF")
+                .setNormalized(true)
+        subject('customer/onboarding/v1/prospect.proto', 'teamA/src/main/proto/customer/onboarding/v1/prospect.proto', "PROTOBUF")
+                .addReference('customer/common/v1/shared.proto', 'customer/common/v1/shared.proto')
+                .addReference('customer/onboarding/v1/common.proto', 'customer/onboarding/v1/common.proto')
+                .setNormalized(true)
+        subject('customer/onboarding/v1/identity.proto', 'teamA/src/main/proto/customer/onboarding/v1/identity.proto', "PROTOBUF")
+                .addReference('customer/common/v1/shared.proto', 'customer/common/v1/shared.proto')
+                .addReference('customer/onboarding/v1/common.proto', 'customer/onboarding/v1/common.proto')
+                .setNormalized(true)
+        subject('customer/onboarding/v1/address.proto', 'teamA/src/main/proto/customer/onboarding/v1/address.proto', "PROTOBUF")
+                .addReference('customer/onboarding/v1/common.proto', 'customer/onboarding/v1/common.proto')
+                .setNormalized(true)
+
+
+        subject('stg.cu.onboarding.prospect-value', 'teamA/src/main/proto/customer/onboarding/v1/prospect.proto', "PROTOBUF")
+                .addReference('customer/common/v1/shared.proto', 'customer/common/v1/shared.proto')
+                .addReference('customer/onboarding/v1/common.proto', 'customer/onboarding/v1/common.proto')
+                .setNormalized(true).setRuleSet('./rules/ruleSet.json')
+        subject('stg.cu.onboarding.address-value', 'teamA/src/main/proto/customer/onboarding/v1/address.proto', "PROTOBUF")
+                .addReference('customer/onboarding/v1/common.proto', 'customer/onboarding/v1/common.proto')
+                .setNormalized(true).setRuleSet('./rules/ruleSet.json')
+        subject('stg.cu.onboarding.identity-value', 'teamA/src/main/proto/customer/onboarding/v1/identity.proto', "PROTOBUF")
+                .addReference('customer/common/v1/shared.proto', 'customer/common/v1/shared.proto')
+                .addReference('customer/onboarding/v1/common.proto', 'customer/onboarding/v1/common.proto')
+                .setNormalized(true).setRuleSet('./rules/ruleSet.json')
+        subject('stg.cu.onboarding.onboarding-value', 'teamA/src/main/proto/customer/onboarding/v1/onboarding.proto', "PROTOBUF")
+                .addReference('customer/onboarding/v1/address.proto', 'customer/onboarding/v1/address.proto')
+                .addReference('customer/onboarding/v1/prospect.proto', 'customer/onboarding/v1/prospect.proto')
+                .addReference('customer/onboarding/v1/identity.proto', 'customer/onboarding/v1/identity.proto')
+                .setNormalized(true).setRuleSet('./rules/ruleSet.json')
+    }*/
 }
